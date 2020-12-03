@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-input = STDIN.each_line.map(&:chomp).map(&:chars)
+input = STDIN.each_line.map(&:chomp)
 
 result = [[1, 1], [3, 1], [5, 1], [7, 1], [1, 2]].map do |dx, dy|
   x = y = n_trees = 0

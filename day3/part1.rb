@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-input = STDIN.each_line.map(&:chomp).map(&:chars)
+input = STDIN.each_line.map(&:chomp)
 
 n_trees = input.
   each_with_index.
