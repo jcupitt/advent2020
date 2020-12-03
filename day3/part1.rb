@@ -2,12 +2,10 @@
 
 input = STDIN.each_line.map(&:chomp).map(&:chars)
 
-x = y = n_trees = 0
-
-while y < input.length
-  n_trees += 1 if input[y][x % input[0].length] == "#"
-  x += 3
-  y += 1
-end
+n_trees = input.
+  each_with_index.
+  map{|x, i| x[i * 3 % input[0].length]}.
+  filter{|x| x == "#"}.
+  count
 
 puts n_trees
