@@ -47,21 +47,13 @@ validation_fns = {
 n_valid = 0
 
 load_passports(STDIN) do |passport|
-  valid = true
-
-  validation_patterns.each do |field, pattern|
-    if !passport.key?(field) || passport[field] !~ pattern
-      valid = false
-      break
+  if validation_patterns.all? do |field, pattern|
+      passport.key?(field) && 
+      passport[field] =~ pattern &&
+      (!validation_fns.include?(field) || validation_fns[field].($~[1], $~[2]))
     end
-
-    if validation_fns.include?(field) && !validation_fns[field].($~[1], $~[2])
-      valid = false
-      break
-    end
+    n_valid += 1 
   end
-
-  n_valid += 1 if valid
 end
 
 puts n_valid
