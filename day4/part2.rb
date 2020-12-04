@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-def load_passports(input)
+def all_passports(input)
   passport = {}
   input.each_line do |line|
     line = line.chomp
@@ -46,7 +46,7 @@ validation_fns = {
 
 n_valid = 0
 
-load_passports(STDIN) do |passport|
+all_passports(STDIN) do |passport|
   if validation_patterns.all? do |field, pattern|
       passport.key?(field) && 
       passport[field] =~ pattern &&
