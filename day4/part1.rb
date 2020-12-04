@@ -1,26 +1,28 @@
 #!/usr/bin/ruby
 
-def valid(passport)
-  passport.length == 8 || 
-    (passport.length == 7 && !passport.include?("cid"))
+def load_passports(input)
+  passport = {}
+  input.each_line do |line|
+    line = line.chomp
+    if line == ""
+      yield passport
+      passport = {}
+    else
+      while line =~ /([a-z]+):([^ ]+)( +)?/
+        passport[$~[1]] = $~[2]
+        line = line[$~[0].length...]
+      end
+    end
+  end
+  yield passport if passport != {}
 end
 
 n_valid = 0
-passport = {}
-STDIN.each_line do |line|
-  line = line.chomp
-  if line == ""
-    n_valid += 1 if valid(passport)
-    passport = {}
-  else
-    while line =~ /([a-z]+):([^ ]+)( +)?/
-      passport[$~[1]] = $~[2]
-      line = line[$~[0].length...]
-    end
+load_passports(STDIN) do |passport|
+  if passport.length == 8 || 
+    (passport.length == 7 && !passport.include?("cid"))
+    n_valid += 1
   end
 end
-if passport != {}
-  n_valid += 1 if valid(passport)
-end
 
-puts "valid = #{n_valid}"
+puts n_valid

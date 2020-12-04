@@ -1,84 +1,67 @@
 #!/usr/bin/ruby
 
-$validation_patterns = {
-  "byr" => /(\d{4})/,
-  "iyr" => /(\d{4})/,
-  "eyr" => /(\d{4})/,
-  "hgt" => /(\d+)(cm|in)/,
-  "hcl" => /#[0-9a-f]{6}/,
-  "ecl" => /(amb|blu|brn|gry|grn|hzl|oth)/,
-  "pid" => /(\d{9})/
-}
-
-def validate_range(lower, upper)
-  def check(v1, v2)
-    puts "in range check"
-    v1.to_i >= lower && v1.to_i <= upper
-  end
-end
-
-def validate_height
-  def check(v1, v2)
-    puts "in height check"
-    if v2 == "in"
-      fn = validate_range(59, 76)
-      fn(v1, v2)
+def load_passports(input)
+  passport = {}
+  input.each_line do |line|
+    line = line.chomp
+    if line == ""
+      yield passport
+      passport = {}
     else
-      fn = validate_range(150, 193)
-      fn(v1, v2)
-    end
-  end
-end
-
-$validation_fns = {
-  "byr" => validate_range(1920, 2002),
-  "iyr" => validate_range(2010, 2020),
-  "eyr" => validate_range(2020, 2030),
-  "hgt" => validate_height
-}
-
-def valid(passport)
-  valid = true
-  puts "passport = #{passport}"
-  $validation_patterns.each do |key, pattern|
-    if ! passport.key? key
-      puts "passport does not include #{key}"
-      valid = false
-    else
-      if passport[key] !~ pattern
-        puts "passport value #{passport[key]} does not match #{pattern}"
-        valid = false
-      else
-        if $validation_fns.include?(key)
-          fn = $validation_fns[key]
-          puts "checking #{key}.."
-          if !fn($~[1], $~[2])
-            valid = false
-          end
-        end
+      while line =~ /([a-z]+):([^ ]+)( +)?/
+        passport[$~[1].to_sym] = $~[2]
+        line = line[$~[0].length...]
       end
     end
   end
-
-  valid
+  yield passport if passport != {}
 end
+
+validation_patterns = {
+  :byr => /^(\d{4})$/,
+  :iyr => /^(\d{4})$/,
+  :eyr => /^(\d{4})$/,
+  :hgt => /^(\d+)(cm|in)$/,
+  :hcl => /^#[0-9a-f]{6}$/,
+  :ecl => /^(amb|blu|brn|gry|grn|hzl|oth)$/,
+  :pid => /^(\d{9})$/
+}
+
+def validate_range(lower, upper)
+  -> (v1, v2) { v1.to_i >= lower && v1.to_i <= upper }
+end
+
+validation_fns = {
+  :byr => validate_range(1920, 2002),
+  :iyr => validate_range(2010, 2020),
+  :eyr => validate_range(2020, 2030),
+  :hgt => -> (v1, v2) {
+    if v2 == "in" 
+      validate_range(59, 76).(v1, v2)
+    else
+      validate_range(150, 193).(v1, v2)
+    end
+  }
+}
 
 n_valid = 0
-passport = {}
-STDIN.each_line do |line|
-  line = line.chomp
-  if line == ""
-    n_valid += 1 if valid(passport)
-    passport = {}
-  else
-    while line =~ /([a-z]+):([^ ]+)( +)?/
-      passport[$~[1]] = $~[2]
-      line = line[$~[0].length...]
+
+load_passports(STDIN) do |passport|
+  valid = true
+
+  validation_patterns.each do |field, pattern|
+    if !passport.key?(field) || passport[field] !~ pattern
+      valid = false
+      break
+    end
+
+    if validation_fns.include?(field) && !validation_fns[field].($~[1], $~[2])
+      valid = false
+      break
     end
   end
-end
-if passport != {}
-  n_valid += 1 if valid(passport)
+
+  n_valid += 1 if valid
 end
 
-puts "valid = #{n_valid}"
+puts n_valid
