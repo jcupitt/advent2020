@@ -1,14 +1,12 @@
 #!/usr/bin/ruby
 
-seat_map = Array.new(832){0}
+require "set"
+
+seat_map = Set.new
 
 STDIN.map do |line|
-  seat_map[line[..9].chars.
-    map{|x| (x == "F" || x == "L") ? 0 : 1}.reduce{|s, x| s << 1 | x}] = 1
+  seat_map.add line[..9].chars.
+    map{|x| (x == "F" || x == "L") ? 0 : 1}.reduce{|s, x| s << 1 | x}
 end
 
-(1 ... seat_map.length).each do |id|
-  puts id if seat_map[id - 1] == 1 && seat_map[id] == 0 && seat_map[id + 1] == 1
-end
-
-
+puts Set.new(seat_map.min .. seat_map.max) - seat_map
