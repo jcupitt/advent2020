@@ -2,9 +2,8 @@
 
 require "set"
 
-seat_map = STDIN.map do |line|
-  line[..9].chars.
-    map{|x| (x == "F" || x == "L") ? 0 : 1}.reduce{|s, x| s << 1 | x}
+ids = STDIN.map do |line|
+  line[..9].chars.reduce(0){|s, x| s << 1 | ((x == "B" || x == "R") ? 1 : 0)}
 end
 
-puts (seat_map.min .. seat_map.max).to_set - seat_map.to_set
+puts (ids.min .. ids.max).to_set - ids.to_set
