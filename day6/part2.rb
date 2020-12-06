@@ -1,5 +1,9 @@
 #!/usr/bin/ruby
 
+require "set"
+
+# yield an array of sets for each group, eg.
+# [#<Set: {"c", "t"}>, #<Set: {"c", "q"}>]
 def read_groups(input)
   group = []
   input.each_line do |line|
@@ -9,17 +13,14 @@ def read_groups(input)
       group = []
       next
     end
-    group << line.chars.map(&:to_sym)
+    group << Set.new(line.chars)
   end
   yield group if group != []
 end
 
-group_counts = []
+counts = 0
 read_groups(STDIN) do |group|
-  counts = Hash.new 0
-  group.each{|person| person.each{|question| counts[question] += 1}}
-  group_counts << 
-    counts.values.map{|value| value == group.length ? 1 : 0}.reduce(:+)
+  counts += group.reduce(:&).length
 end
 
-puts group_counts.reduce :+
+puts counts
